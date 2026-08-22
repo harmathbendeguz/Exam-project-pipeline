@@ -3,6 +3,8 @@ const cors = require('cors');
 
 const departmentRoutes = require('./routes/departmentRoutes');
 const projectRoutes = require('./routes/projectRoutes');
+const stageRoutes = require('./routes/stageRoutes');
+const taskRoutes = require('./routes/taskRoutes');
 
 const app = express();
 
@@ -15,6 +17,8 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/departments', departmentRoutes);
 app.use('/api/projects', projectRoutes);
+app.use('/api/stages', stageRoutes);
+app.use('/api/tasks', taskRoutes);
 
 // No route matched.
 app.use((req, res) => {
