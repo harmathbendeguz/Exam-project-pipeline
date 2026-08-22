@@ -10,8 +10,9 @@ business rules.
 
 ## Status
 
-Week 1 in progress: repo scaffold, Docker Compose, and a minimal Express API
-with a health check endpoint. Models, full CRUD, tests, business logic, and
+Week 1 complete: repo scaffold, Docker Compose, all 5 Mongoose models, full
+CRUD for Department/Project/Stage/Task (route → controller → service →
+repository), and a Jest/Supertest suite. Business logic, notifications, and
 the frontend land in later weeks (see `server/src/app.js` time plan).
 
 ## Install & run
@@ -40,6 +41,16 @@ Copy `server/.env.example` to `server/.env` and adjust as needed:
 - `PORT` — port the API listens on (default `3000`)
 - `MONGO_URI` — MongoDB connection string (default points at the `mongo`
   service in Docker Compose)
+
+## Tests & seed data
+
+From `server/`:
+
+```bash
+npm test    # Jest + Supertest; spins up an in-memory MongoDB, no Docker needed
+npm run seed  # wipes and repopulates Project/Stage with one demo pipeline
+              # (run this against a real MONGO_URI, e.g. with docker compose up)
+```
 
 ## Project structure
 
