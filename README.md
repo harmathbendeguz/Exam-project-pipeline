@@ -10,10 +10,26 @@ business rules.
 
 ## Status
 
-Week 1 complete: repo scaffold, Docker Compose, all 5 Mongoose models, full
-CRUD for Department/Project/Stage/Task (route → controller → service →
-repository), and a Jest/Supertest suite. Business logic, notifications, and
-the frontend land in later weeks (see `server/src/app.js` time plan).
+Week 1 & 2 complete: repo scaffold, Docker Compose, all 5 Mongoose models,
+full CRUD for Department/Project/Stage/Task, sequential stage enforcement,
+a delay-detection cron job, system-generated notifications, and live
+Socket.IO updates (`notification:new`). 26 Jest/Supertest tests. The
+frontend lands in Week 3 (see `server/src/app.js` time plan).
+
+### Pipeline rules (Week 2)
+
+- A new Stage starts `active` if it's order `0`, `locked` otherwise.
+- A Stage can only move to `active` once the previous Stage is `done`.
+- A Stage can only move to `done` if it's `active` and every Task under it
+  is `done` — otherwise the request is rejected (`409`) and each blocking
+  department gets a `task_incomplete` notification.
+- Completing a Stage unlocks the next one (`locked → active`) and notifies
+  every department with a Task in it (`stage_unlocked`).
+- Every 5 minutes, `jobs/delayChecker.js` flips overdue `todo`/`in_progress`
+  Tasks to `delayed` and notifies the owning department (`task_delayed`).
+- Every notification is broadcast live over Socket.IO as `notification:new`
+  the moment it's created, and readable via
+  `GET /api/notifications` / `PATCH /api/notifications/:id/read`.
 
 ## Install & run
 

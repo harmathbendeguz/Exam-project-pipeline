@@ -10,4 +10,17 @@ class NotFoundError extends Error {
   }
 }
 
-module.exports = { NotFoundError };
+// Thrown when a request is well-formed and the target exists, but a
+// business rule blocks it — e.g. activating a stage before the previous
+// one is done. Distinct from ValidationError (bad input shape) and
+// NotFoundError (nothing there): the resource exists, its current state
+// just conflicts with what was asked.
+class ConflictError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'ConflictError';
+    this.statusCode = 409;
+  }
+}
+
+module.exports = { NotFoundError, ConflictError };

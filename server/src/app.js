@@ -5,6 +5,7 @@ const departmentRoutes = require('./routes/departmentRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const stageRoutes = require('./routes/stageRoutes');
 const taskRoutes = require('./routes/taskRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use('/api/departments', departmentRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/stages', stageRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // No route matched.
 app.use((req, res) => {
