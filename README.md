@@ -10,11 +10,28 @@ business rules.
 
 ## Status
 
-Week 1 & 2 complete: repo scaffold, Docker Compose, all 5 Mongoose models,
-full CRUD for Department/Project/Stage/Task, sequential stage enforcement,
-a delay-detection cron job, system-generated notifications, and live
-Socket.IO updates (`notification:new`). 26 Jest/Supertest tests. The
-frontend lands in Week 3 (see `server/src/app.js` time plan).
+Week 1, 2 & 3 complete: repo scaffold, Docker Compose, all 5 Mongoose
+models, full CRUD for Department/Project/Stage/Task, sequential stage
+enforcement, a delay-detection cron job, system-generated notifications,
+live Socket.IO updates, and a React dashboard with a React Flow pipeline
+view and a live notification panel. 26 Jest/Supertest tests. Week 4 is
+polish: coverage, a clean-code pass, and OpenAPI docs (see
+`server/src/app.js` time plan).
+
+### Frontend (Week 3)
+
+- **Dashboard** (`/`) — lists all projects with status and deadline.
+- **Project view** (`/projects/:id`) — the pipeline rendered with React
+  Flow: one node per Stage, colored by status, connected in order.
+  Clicking a node opens a panel of that Stage's Tasks — mark a Task
+  done, or attempt to complete the Stage (a still-incomplete Task shows
+  the API's `409` message inline, exactly as returned).
+  Completing a Stage re-fetches and shows the next one unlocking live.
+- **Notification bell** (every page) — badge count of unread
+  notifications; the panel lists them newest-first and marks read on
+  click. New notifications arrive over Socket.IO with no polling.
+- **Responsive**: the pipeline/task-panel layout stacks vertically and
+  the notification panel goes full-width below 768px.
 
 ### Pipeline rules (Week 2)
 
@@ -42,6 +59,7 @@ docker compose up --build
 This starts:
 - `api` — Express server on http://localhost:3000
 - `mongo` — MongoDB on port 27017
+- `client` — React app on http://localhost:5173
 
 Check the API is up:
 
@@ -57,6 +75,12 @@ Copy `server/.env.example` to `server/.env` and adjust as needed:
 - `PORT` — port the API listens on (default `3000`)
 - `MONGO_URI` — MongoDB connection string (default points at the `mongo`
   service in Docker Compose)
+
+Copy `client/.env.example` to `client/.env` and adjust as needed:
+
+- `VITE_API_URL` — where the browser reaches the API (default
+  `http://localhost:3000`). Must be host-reachable, not the internal
+  Docker service name — the client runs in the browser, not the container.
 
 ## Tests & seed data
 

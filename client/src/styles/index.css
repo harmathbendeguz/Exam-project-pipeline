@@ -1,0 +1,500 @@
+:root {
+  --bg: #f6f7fb;
+  --surface: #ffffff;
+  --border: #e2e5ec;
+  --text: #1c2233;
+  --text-muted: #6b7280;
+  --primary: #4f46e5;
+  --primary-dark: #4338ca;
+
+  --locked: #9ca3af;
+  --active: #f59e0b;
+  --done: #16a34a;
+  --delayed: #dc2626;
+
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(16, 24, 40, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+h1,
+h2,
+h3 {
+  margin: 0 0 0.5rem;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Header ---------- */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.header__brand {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--primary);
+}
+
+.layout__content {
+  flex: 1;
+  padding: 1.5rem;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ---------- Status badges ---------- */
+
+.status-badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-badge--planning {
+  background: #e5e7eb;
+  color: #374151;
+}
+.status-badge--in_progress {
+  background: #fef3c7;
+  color: #92400e;
+}
+.status-badge--completed {
+  background: #dcfce7;
+  color: #166534;
+}
+.status-badge--stage-locked {
+  background: #e5e7eb;
+  color: #374151;
+}
+.status-badge--stage-active {
+  background: #fef3c7;
+  color: #92400e;
+}
+.status-badge--stage-done {
+  background: #dcfce7;
+  color: #166534;
+}
+
+/* ---------- Dashboard ---------- */
+
+.dashboard-page h1 {
+  margin-bottom: 1rem;
+}
+
+.project-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.project-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+  display: block;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 24, 40, 0.12);
+}
+
+.project-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.project-card__title {
+  font-size: 1rem;
+}
+
+.project-card__client,
+.project-card__deadline {
+  margin: 0.2rem 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.empty-state {
+  color: var(--text-muted);
+}
+
+.page-status {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.page-status--error {
+  color: var(--delayed);
+}
+
+/* ---------- Project page / pipeline ---------- */
+
+.project-page__header {
+  margin-bottom: 1rem;
+}
+
+.project-page__back {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.project-page__client {
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.project-page__body {
+  display: flex;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.pipeline-view {
+  flex: 1;
+  height: 60vh;
+  min-height: 360px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.stage-node {
+  min-width: 180px;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  border: 2px solid var(--locked);
+  background: var(--surface);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.stage-node--locked {
+  border-color: var(--locked);
+  opacity: 0.75;
+}
+.stage-node--active {
+  border-color: var(--active);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}
+.stage-node--done {
+  border-color: var(--done);
+}
+
+.stage-node__name {
+  font-weight: 600;
+}
+
+.stage-node__status {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0.15rem 0;
+}
+
+.stage-node__tasks {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ---------- Stage detail panel ---------- */
+
+.stage-panel {
+  width: 320px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+
+.stage-panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.stage-panel__close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+.stage-panel__tasks {
+  list-style: none;
+  margin: 1rem 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.task-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.task-row__title {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.task-row__meta {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.task-row button,
+.stage-panel__complete {
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.task-row button:hover,
+.stage-panel__complete:hover {
+  background: var(--primary-dark);
+}
+
+.stage-panel__complete {
+  width: 100%;
+  padding: 0.6rem;
+  margin-top: 0.5rem;
+}
+
+.stage-panel__complete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.stage-panel__error {
+  margin-top: 0.5rem;
+  color: var(--delayed);
+  font-size: 0.85rem;
+}
+
+.stage-panel__empty {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* ---------- Notifications ---------- */
+
+.notification-bell {
+  position: relative;
+}
+
+.notification-bell__button {
+  position: relative;
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+}
+
+.notification-bell__count {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  background: var(--delayed);
+  color: white;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  padding: 0.05rem 0.35rem;
+  font-weight: 700;
+}
+
+.notification-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  width: 320px;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.15);
+  padding: 0.75rem;
+  z-index: 30;
+}
+
+.notification-panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.notification-panel__close {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.notification-panel__empty {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.notification-panel__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.notification-item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  padding: 0.5rem;
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.notification-item--unread {
+  background: #eef2ff;
+}
+
+.notification-item__badge {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
+  color: white;
+}
+
+.notification-item__badge--task_delayed {
+  background: var(--delayed);
+}
+.notification-item__badge--task_incomplete {
+  background: var(--active);
+}
+.notification-item__badge--stage_unlocked {
+  background: var(--done);
+}
+
+.notification-item__body {
+  flex: 1;
+}
+
+.notification-item__message {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.notification-item__time {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.notification-item__mark-read {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.4rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 768px) {
+  .layout__content {
+    padding: 1rem;
+  }
+
+  .project-page__body {
+    flex-direction: column;
+  }
+
+  .stage-panel {
+    width: 100%;
+  }
+
+  .pipeline-view {
+    /* flex-direction is column here, so height becomes the main axis —
+       "flex: 1" (flex-basis: 0) from the base rule would otherwise
+       override this explicit height entirely. flex: none restores it. */
+    flex: none;
+    height: 50vh;
+  }
+
+  .notification-panel {
+    position: fixed;
+    top: 3.5rem;
+    right: 0.5rem;
+    left: 0.5rem;
+    width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 0.6rem 1rem;
+  }
+
+  .project-list {
+    grid-template-columns: 1fr;
+  }
+}

@@ -19,5 +19,20 @@ services:
     volumes:
       - mongo_data:/data/db
 
+  client:
+    build: ./client
+    ports:
+      - "5173:5173"
+    environment:
+      # Runs in the browser, not the container network — must be an
+      # address the host machine (and the browser on it) can resolve,
+      # which the internal Docker service name "api" is not.
+      VITE_API_URL: http://localhost:3000
+    depends_on:
+      - api
+    volumes:
+      - ./client/src:/app/src
+    command: npm run dev -- --host
+
 volumes:
   mongo_data:
