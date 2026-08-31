@@ -42,6 +42,13 @@ describe('Project CRUD', () => {
     expect(res.status).toBe(404);
   });
 
+  it('returns 404 updating a nonexistent project', async () => {
+    const res = await request(app)
+      .put('/api/projects/000000000000000000000000')
+      .send({ status: 'in_progress' });
+    expect(res.status).toBe(404);
+  });
+
   it('updates a project status', async () => {
     const created = await request(app)
       .post('/api/projects')
@@ -62,5 +69,10 @@ describe('Project CRUD', () => {
 
     const after = await request(app).get(`/api/projects/${created.body._id}`);
     expect(after.status).toBe(404);
+  });
+
+  it('returns 404 deleting a nonexistent project', async () => {
+    const res = await request(app).delete('/api/projects/000000000000000000000000');
+    expect(res.status).toBe(404);
   });
 });

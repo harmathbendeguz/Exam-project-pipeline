@@ -10,13 +10,13 @@ business rules.
 
 ## Status
 
-Week 1, 2 & 3 complete: repo scaffold, Docker Compose, all 5 Mongoose
+All four weeks complete: repo scaffold, Docker Compose, all 5 Mongoose
 models, full CRUD for Department/Project/Stage/Task, sequential stage
 enforcement, a delay-detection cron job, system-generated notifications,
-live Socket.IO updates, and a React dashboard with a React Flow pipeline
-view and a live notification panel. 26 Jest/Supertest tests. Week 4 is
-polish: coverage, a clean-code pass, and OpenAPI docs (see
-`server/src/app.js` time plan).
+live Socket.IO updates, a React dashboard with a React Flow pipeline view
+and a live notification panel, 57 Jest/Supertest tests (98.5%
+statement / 95% branch coverage), and the OpenAPI spec at
+[`docs/openapi.yaml`](docs/openapi.yaml) (see `server/src/app.js` time plan).
 
 ### Frontend (Week 3)
 
@@ -87,13 +87,31 @@ Copy `client/.env.example` to `client/.env` and adjust as needed:
 From `server/`:
 
 ```bash
-npm test    # Jest + Supertest; spins up an in-memory MongoDB, no Docker needed
-npm run seed  # wipes and repopulates Project/Stage with one demo pipeline
-              # (run this against a real MONGO_URI, e.g. with docker compose up)
+npm test                # Jest + Supertest; in-memory MongoDB, no Docker needed
+npm test -- --coverage  # same, with a coverage report
+npm run seed             # wipes and repopulates: 5 departments, one 5-stage
+                          # project with 2 tasks per stage, and a second,
+                          # stage-less project. Run against a real MONGO_URI
+                          # (e.g. with docker compose up).
 ```
+
+57 tests across 9 files: CRUD + validation + 404/400/409 paths for every
+resource, the full sequential-stage rule set (including edge cases like
+completing the last stage in a pipeline, and de-duplicating notifications
+across multiple tasks in the same department), the delay-detection cron
+job, and a real Socket.IO round-trip.
+
+## API documentation
+
+The full endpoint reference — request/response shapes, every documented
+status code, and the pipeline-rule semantics on `PUT /api/stages/:id` — is
+in [`docs/openapi.yaml`](docs/openapi.yaml) (OpenAPI 3.0). Paste it into
+[editor.swagger.io](https://editor.swagger.io) for an interactive view.
 
 ## Project structure
 
-See `server/src` for the logic tier (routes, controllers, services,
-repositories, models, jobs) and `docs/openapi.yaml` for API documentation
-(added in Week 4).
+See `server/src` for the logic tier: `routes` → `controllers` → `services`
+→ `repositories` → `models`, plus `jobs/delayChecker.js` for the cron job.
+`client/src` mirrors the same layering on the frontend: `api/` (only files
+that call `fetch`), `hooks/` (data + Socket.IO state), `components/` and
+`pages/` (presentation only).

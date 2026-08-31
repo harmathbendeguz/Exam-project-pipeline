@@ -53,6 +53,13 @@ describe('Department CRUD', () => {
     expect(res.status).toBe(400);
   });
 
+  it('returns 404 updating a nonexistent department', async () => {
+    const res = await request(app)
+      .put('/api/departments/000000000000000000000000')
+      .send({ email: 'new@postflow.dev' });
+    expect(res.status).toBe(404);
+  });
+
   it('updates a department', async () => {
     const created = await request(app)
       .post('/api/departments')
@@ -73,5 +80,10 @@ describe('Department CRUD', () => {
 
     const after = await request(app).get(`/api/departments/${created.body._id}`);
     expect(after.status).toBe(404);
+  });
+
+  it('returns 404 deleting a nonexistent department', async () => {
+    const res = await request(app).delete('/api/departments/000000000000000000000000');
+    expect(res.status).toBe(404);
   });
 });

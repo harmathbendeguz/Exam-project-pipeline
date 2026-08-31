@@ -1,0 +1,519 @@
+openapi: 3.0.3
+info:
+  title: PostFlow API
+  description: >
+    Film post-production pipeline manager. A Project moves through an
+    ordered sequence of Stages (e.g. Editing, Color Grading, Sound); each
+    Stage is made up of Tasks owned by a Department. Stage transitions are
+    rule-enforced (see the 409 responses below), and the system generates
+    Notifications automatically — they are never created directly by a
+    client.
+  version: "1.0.0"
+servers:
+  - url: http://localhost:3000
+    description: Local / Docker Compose
+
+tags:
+  - name: Health
+  - name: Departments
+  - name: Projects
+  - name: Stages
+  - name: Tasks
+  - name: Notifications
+
+paths:
+  /api/health:
+    get:
+      tags: [Health]
+      summary: Liveness check
+      responses:
+        "200":
+          description: The API is up
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /api/departments:
+    get:
+      tags: [Departments]
+      summary: List all departments
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Department" }
+    post:
+      tags: [Departments]
+      summary: Create a department
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DepartmentInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Department" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "409": { $ref: "#/components/responses/Conflict" }
+
+  /api/departments/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [Departments]
+      summary: Get a department by id
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Department" }
+        "400": { $ref: "#/components/responses/BadId" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Departments]
+      summary: Update a department
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DepartmentInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Department" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+    delete:
+      tags: [Departments]
+      summary: Delete a department
+      responses:
+        "204": { description: Deleted }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/projects:
+    get:
+      tags: [Projects]
+      summary: List all projects
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Project" }
+    post:
+      tags: [Projects]
+      summary: Create a project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProjectInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Project" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+
+  /api/projects/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [Projects]
+      summary: Get a project by id
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Project" }
+        "400": { $ref: "#/components/responses/BadId" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Projects]
+      summary: Update a project
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProjectInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Project" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [Projects]
+      summary: Delete a project
+      responses:
+        "204": { description: Deleted }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/projects/{id}/stages:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [Stages]
+      summary: List a project's stages, ordered
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Stage" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    post:
+      tags: [Stages]
+      summary: Create a stage under a project
+      description: >
+        `status` is computed by the server and ignored if sent: order 0
+        starts `active`, every other order starts `locked`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StageInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Stage" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: >
+            Duplicate `order` within this project (compound unique index
+            on `{ projectId, order }`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/stages/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [Stages]
+      summary: Get a stage by id
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Stage" }
+        "400": { $ref: "#/components/responses/BadId" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Stages]
+      summary: Update a stage, including pipeline transitions
+      description: |
+        Setting `status` triggers the pipeline rules:
+        - `active`: rejected with 409 unless this is order 0, or the
+          previous stage (`order - 1`) is `done`.
+        - `done`: rejected with 409 unless the stage is currently `active`
+          and every Task under it is `done`. On rejection, each department
+          with an incomplete Task gets a `task_incomplete` notification.
+          On success, the next stage (if `locked`) flips to `active`, and
+          every department with a Task in it gets a `stage_unlocked`
+          notification — both broadcast live over Socket.IO as
+          `notification:new`.
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StageUpdateInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Stage" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409":
+          description: Pipeline rule violation (see description above).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    delete:
+      tags: [Stages]
+      summary: Delete a stage
+      responses:
+        "204": { description: Deleted }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/stages/{id}/tasks:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [Tasks]
+      summary: List a stage's tasks
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Task" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    post:
+      tags: [Tasks]
+      summary: Create a task under a stage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TaskInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Task" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/tasks/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [Tasks]
+      summary: Get a task by id
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Task" }
+        "400": { $ref: "#/components/responses/BadId" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Tasks]
+      summary: Update a task
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TaskInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Task" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    delete:
+      tags: [Tasks]
+      summary: Delete a task
+      responses:
+        "204": { description: Deleted }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/notifications:
+    get:
+      tags: [Notifications]
+      summary: List notifications, newest first
+      description: >
+        Notifications are system-generated only (the delay-detection cron
+        job, or stage transitions) — there is no POST endpoint.
+      parameters:
+        - name: departmentId
+          in: query
+          schema: { type: string }
+          description: Filter to one department's notifications.
+        - name: read
+          in: query
+          schema: { type: boolean }
+          description: Filter by read/unread.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Notification" }
+
+  /api/notifications/{id}/read:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    patch:
+      tags: [Notifications]
+      summary: Mark a notification as read
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Notification" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+      description: MongoDB ObjectId
+
+  responses:
+    NotFound:
+      description: No document with that id exists
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    BadId:
+      description: The id is not a valid MongoDB ObjectId
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    ValidationError:
+      description: A required field is missing, or a value fails schema validation
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Conflict:
+      description: Duplicate value violates a unique constraint
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+
+    Department:
+      allOf:
+        - $ref: "#/components/schemas/DepartmentInput"
+        - type: object
+          properties:
+            _id: { type: string }
+            createdAt: { type: string, format: date-time }
+            updatedAt: { type: string, format: date-time }
+    DepartmentInput:
+      type: object
+      required: [name, email]
+      properties:
+        name: { type: string }
+        email: { type: string }
+
+    Project:
+      allOf:
+        - $ref: "#/components/schemas/ProjectInput"
+        - type: object
+          properties:
+            _id: { type: string }
+            createdAt: { type: string, format: date-time }
+            updatedAt: { type: string, format: date-time }
+    ProjectInput:
+      type: object
+      required: [title, deadline]
+      properties:
+        title: { type: string }
+        client: { type: string }
+        description: { type: string }
+        deadline: { type: string, format: date-time }
+        status:
+          type: string
+          enum: [planning, in_progress, completed]
+          default: planning
+
+    Stage:
+      allOf:
+        - type: object
+          properties:
+            _id: { type: string }
+            projectId: { type: string }
+            name: { type: string }
+            order: { type: integer }
+            status:
+              type: string
+              enum: [locked, active, done]
+            plannedEnd: { type: string, format: date-time }
+            createdAt: { type: string, format: date-time }
+            updatedAt: { type: string, format: date-time }
+    StageInput:
+      type: object
+      required: [name, order, plannedEnd]
+      properties:
+        name: { type: string }
+        order:
+          type: integer
+          description: Position in the pipeline (0-indexed). Order 0 starts active.
+        plannedEnd: { type: string, format: date-time }
+    StageUpdateInput:
+      type: object
+      properties:
+        name: { type: string }
+        order: { type: integer }
+        plannedEnd: { type: string, format: date-time }
+        status:
+          type: string
+          enum: [locked, active, done]
+          description: Triggers the pipeline rules — see the PUT description above.
+
+    Task:
+      allOf:
+        - type: object
+          properties:
+            _id: { type: string }
+            stageId: { type: string }
+            departmentId: { type: string }
+            title: { type: string }
+            description: { type: string }
+            status:
+              type: string
+              enum: [todo, in_progress, done, delayed]
+            dueDate: { type: string, format: date-time }
+            createdAt: { type: string, format: date-time }
+            updatedAt: { type: string, format: date-time }
+    TaskInput:
+      type: object
+      required: [title, departmentId, dueDate]
+      properties:
+        title: { type: string }
+        description: { type: string }
+        departmentId: { type: string }
+        dueDate: { type: string, format: date-time }
+        status:
+          type: string
+          enum: [todo, in_progress, done, delayed]
+          default: todo
+
+    Notification:
+      type: object
+      properties:
+        _id: { type: string }
+        departmentId: { type: string }
+        taskId: { type: string, nullable: true }
+        type:
+          type: string
+          enum: [task_delayed, task_incomplete, stage_unlocked]
+        message: { type: string }
+        read: { type: boolean, default: false }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
