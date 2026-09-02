@@ -7,6 +7,12 @@ const listByStage = asyncHandler(async (req, res) => {
   res.json(tasks);
 });
 
+// Nested under /api/users/:id/tasks
+const listByUser = asyncHandler(async (req, res) => {
+  const tasks = await taskService.listTasksForUser(req.params.id);
+  res.json(tasks);
+});
+
 const createForStage = asyncHandler(async (req, res) => {
   const task = await taskService.createTaskForStage(req.params.id, req.body);
   res.status(201).json(task);
@@ -28,4 +34,4 @@ const deleteTask = asyncHandler(async (req, res) => {
   res.status(204).send();
 });
 
-module.exports = { listByStage, createForStage, getTask, updateTask, deleteTask };
+module.exports = { listByStage, listByUser, createForStage, getTask, updateTask, deleteTask };

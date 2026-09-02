@@ -1,11 +1,21 @@
 const taskRepository = require('../repositories/taskRepository');
 const stageRepository = require('../repositories/stageRepository');
+const userRepository = require('../repositories/userRepository');
 const { NotFoundError } = require('../utils/errors');
 
 async function listTasksForStage(stageId) {
   const stage = await stageRepository.findById(stageId);
   if (!stage) throw new NotFoundError(`Stage ${stageId} not found`);
   return taskRepository.findByStageId(stageId);
+}
+
+// The per-user "progress" view: every task assigned to this person,
+// across every project/stage. No pipeline rule cares about this list —
+// it's purely for someone (or their manager) to see where they stand.
+async function listTasksForUser(userId) {
+  const user = await userRepository.findById(userId);
+  if (!user) throw new NotFoundError(`User ${userId} not found`);
+  return taskRepository.findByAssigneeId(userId);
 }
 
 async function createTaskForStage(stageId, data) {
@@ -34,6 +44,7 @@ async function deleteTask(id) {
 
 module.exports = {
   listTasksForStage,
+  listTasksForUser,
   createTaskForStage,
   getTask,
   updateTask,
