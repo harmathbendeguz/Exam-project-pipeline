@@ -10,17 +10,37 @@ business rules.
 
 ## Status
 
-All four weeks complete: repo scaffold, Docker Compose, all 5 Mongoose
-models, full CRUD for Department/Project/Stage/Task, sequential stage
-enforcement, a delay-detection cron job, system-generated notifications,
-live Socket.IO updates, a React dashboard with a React Flow pipeline view
-and a live notification panel, 57 Jest/Supertest tests (98.5%
-statement / 95% branch coverage), and the OpenAPI spec at
+All four planned weeks complete, plus a post-submission addition (Users
+and email alerts): repo scaffold, Docker Compose, 6 Mongoose models, full
+CRUD for every resource, sequential stage enforcement, a delay-detection
+cron job, system-generated notifications (live over Socket.IO **and**
+email), a React dashboard (including creating/deleting projects) with a
+React Flow pipeline view and a live notification panel, 74
+Jest/Supertest tests, and the OpenAPI spec at
 [`docs/openapi.yaml`](docs/openapi.yaml) (see `server/src/app.js` time plan).
 
-### Frontend (Week 3)
+### Users & task assignment
+
+- `User` (name, email, department) is **attribution only** — no
+  password, no session, not authentication. It exists so a Task can be
+  assigned to a specific person (`Task.assigneeId`, optional) and their
+  progress tracked via `GET /api/users/:id/tasks`.
+- Every notification also sends an email alert: to the task's assignee
+  if one is set, otherwise to the owning department
+  (`Department.email`). Configure via `SMTP_*` env vars — unconfigured
+  (the default), it logs instead of sending, so no real credentials are
+  ever required for dev or for the test suite.
+- Backend is complete and tested (`tests/user.test.js`,
+  `tests/mailer.test.js`, `tests/notificationEmail.test.js`). The
+  frontend (a "who am I" picker, an assignee dropdown on tasks, toast
+  popups for live alerts) is the next planned increment, not yet built.
+
+### Frontend
 
 - **Dashboard** (`/`) — lists all projects with status and deadline.
+  **+ New Project** creates one inline; each card has a **Delete**
+  button (with a confirm step — deleting a project cascades to its
+  stages and tasks, so this is a real "are you sure").
 - **Project view** (`/projects/:id`) — the pipeline rendered with React
   Flow: one node per Stage, colored by status, connected in order.
   Clicking a node opens a panel of that Stage's Tasks — mark a Task
@@ -75,6 +95,9 @@ Copy `server/.env.example` to `server/.env` and adjust as needed:
 - `PORT` — port the API listens on (default `3000`)
 - `MONGO_URI` — MongoDB connection string (default points at the `mongo`
   service in Docker Compose)
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `ALERTS_FROM` —
+  optional. Unset (the default), notification emails are logged instead
+  of sent — no real mail account is required to run or test the app.
 
 Copy `client/.env.example` to `client/.env` and adjust as needed:
 
@@ -95,11 +118,13 @@ npm run seed             # wipes and repopulates: 5 departments, one 5-stage
                           # (e.g. with docker compose up).
 ```
 
-57 tests across 9 files: CRUD + validation + 404/400/409 paths for every
+74 tests across 12 files: CRUD + validation + 404/400/409 paths for every
 resource, the full sequential-stage rule set (including edge cases like
 completing the last stage in a pipeline, and de-duplicating notifications
-across multiple tasks in the same department), the delay-detection cron
-job, and a real Socket.IO round-trip.
+across multiple tasks in the same department), cascade deletes
+(Project → Stages → Tasks), the delay-detection cron job, email-alert
+routing (assignee vs. department, mocked — no real SMTP connection), and
+a real Socket.IO round-trip.
 
 ## API documentation
 

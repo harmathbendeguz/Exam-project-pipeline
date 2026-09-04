@@ -4,10 +4,12 @@ info:
   description: >
     Film post-production pipeline manager. A Project moves through an
     ordered sequence of Stages (e.g. Editing, Color Grading, Sound); each
-    Stage is made up of Tasks owned by a Department. Stage transitions are
-    rule-enforced (see the 409 responses below), and the system generates
-    Notifications automatically — they are never created directly by a
-    client.
+    Stage is made up of Tasks owned by a Department and, optionally,
+    assigned to a specific User. Stage transitions are rule-enforced (see
+    the 409 responses below), and the system generates Notifications
+    automatically — they are never created directly by a client. Every
+    notification also triggers an email alert (to the Task's assignee if
+    one is set, otherwise the Department) and a live Socket.IO event.
   version: "1.0.0"
 servers:
   - url: http://localhost:3000
@@ -16,6 +18,7 @@ servers:
 tags:
   - name: Health
   - name: Departments
+  - name: Users
   - name: Projects
   - name: Stages
   - name: Tasks
@@ -104,6 +107,92 @@ paths:
         "204": { description: Deleted }
         "404": { $ref: "#/components/responses/NotFound" }
 
+  /api/users:
+    get:
+      tags: [Users]
+      summary: List all users
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/User" }
+    post:
+      tags: [Users]
+      summary: Create a user
+      description: >
+        Attribution only — there is no password or session. A person
+        picks themself in the UI so tasks can be assigned to them.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UserInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "409": { $ref: "#/components/responses/Conflict" }
+
+  /api/users/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [Users]
+      summary: Get a user by id
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "400": { $ref: "#/components/responses/BadId" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Users]
+      summary: Update a user
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UserInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/Conflict" }
+    delete:
+      tags: [Users]
+      summary: Delete a user
+      responses:
+        "204": { description: Deleted }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/users/{id}/tasks:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [Users]
+      summary: List every task assigned to this user, across all projects/stages
+      description: The per-user progress view.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Task" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
   /api/projects:
     get:
       tags: [Projects]
@@ -164,6 +253,7 @@ paths:
     delete:
       tags: [Projects]
       summary: Delete a project
+      description: Cascades — also deletes every Stage under this project, and every Task under those Stages.
       responses:
         "204": { description: Deleted }
         "404": { $ref: "#/components/responses/NotFound" }
@@ -258,6 +348,7 @@ paths:
     delete:
       tags: [Stages]
       summary: Delete a stage
+      description: Cascades — also deletes every Task under this stage.
       responses:
         "204": { description: Deleted }
         "404": { $ref: "#/components/responses/NotFound" }
@@ -483,6 +574,10 @@ components:
             _id: { type: string }
             stageId: { type: string }
             departmentId: { type: string }
+            assigneeId:
+              type: string
+              nullable: true
+              description: The User responsible for this task, if one has been assigned.
             title: { type: string }
             description: { type: string }
             status:
@@ -498,11 +593,30 @@ components:
         title: { type: string }
         description: { type: string }
         departmentId: { type: string }
+        assigneeId:
+          type: string
+          description: Optional — a task can be created unassigned and picked up later.
         dueDate: { type: string, format: date-time }
         status:
           type: string
           enum: [todo, in_progress, done, delayed]
           default: todo
+
+    User:
+      allOf:
+        - $ref: "#/components/schemas/UserInput"
+        - type: object
+          properties:
+            _id: { type: string }
+            createdAt: { type: string, format: date-time }
+            updatedAt: { type: string, format: date-time }
+    UserInput:
+      type: object
+      required: [name, email, departmentId]
+      properties:
+        name: { type: string }
+        email: { type: string }
+        departmentId: { type: string }
 
     Notification:
       type: object

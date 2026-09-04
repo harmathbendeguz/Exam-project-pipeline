@@ -6,5 +6,14 @@ const findByProjectAndOrder = (projectId, order) => Stage.findOne({ projectId, o
 const findById = (id) => Stage.findById(id);
 const updateById = (id, data) => Stage.findByIdAndUpdate(id, data, { new: true, runValidators: true });
 const deleteById = (id) => Stage.findByIdAndDelete(id);
+const deleteByProjectId = (projectId) => Stage.deleteMany({ projectId });
 
-module.exports = { create, findByProjectId, findByProjectAndOrder, findById, updateById, deleteById };
+module.exports = {
+  create,
+  findByProjectId,
+  findByProjectAndOrder,
+  findById,
+  updateById,
+  deleteById,
+  deleteByProjectId,
+};

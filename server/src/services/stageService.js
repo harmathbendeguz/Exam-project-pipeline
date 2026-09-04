@@ -54,6 +54,8 @@ async function updateStage(id, data) {
 async function deleteStage(id) {
   const stage = await stageRepository.deleteById(id);
   if (!stage) throw new NotFoundError(`Stage ${id} not found`);
+  // Cascade: a Task with no Stage is an orphan nothing can reach again.
+  await taskRepository.deleteByStageIds([id]);
   return stage;
 }
 

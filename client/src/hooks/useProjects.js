@@ -1,5 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
-import { listProjects } from '../api/projects';
+import {
+  listProjects,
+  createProject as createProjectRequest,
+  deleteProject as deleteProjectRequest,
+} from '../api/projects';
 
 export function useProjects() {
   const [projects, setProjects] = useState([]);
@@ -22,5 +26,15 @@ export function useProjects() {
     refresh();
   }, [refresh]);
 
-  return { projects, loading, error, refresh };
+  async function createProject(data) {
+    await createProjectRequest(data);
+    await refresh();
+  }
+
+  async function deleteProject(id) {
+    await deleteProjectRequest(id);
+    await refresh();
+  }
+
+  return { projects, loading, error, refresh, createProject, deleteProject };
 }

@@ -7,6 +7,11 @@ const findById = (id) => Task.findById(id);
 const updateById = (id, data) => Task.findByIdAndUpdate(id, data, { new: true, runValidators: true });
 const deleteById = (id) => Task.findByIdAndDelete(id);
 
+// Cascade helper: removes every task under any of the given stages.
+// Used when a Stage or Project is deleted, so tasks don't outlive their
+// parent as orphaned documents nothing can ever reach again.
+const deleteByStageIds = (stageIds) => Task.deleteMany({ stageId: { $in: stageIds } });
+
 // Used only by the delay-detection cron job: not-yet-finished tasks whose
 // due date has already passed. 'done' and 'delayed' are excluded so an
 // already-flagged task doesn't get re-processed (and re-notified) forever.
@@ -20,5 +25,6 @@ module.exports = {
   findById,
   updateById,
   deleteById,
+  deleteByStageIds,
   findOverdue,
 };

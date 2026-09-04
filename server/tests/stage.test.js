@@ -96,4 +96,22 @@ describe('Stage CRUD', () => {
     const res = await request(app).delete('/api/stages/000000000000000000000000');
     expect(res.status).toBe(404);
   });
+
+  it('cascades: deleting a stage also deletes its tasks', async () => {
+    const project = await createProject();
+    const department = await request(app)
+      .post('/api/departments')
+      .send({ name: 'Editing', email: 'editing@postflow.dev' });
+    const stage = await request(app)
+      .post(`/api/projects/${project._id}/stages`)
+      .send({ name: 'Editing', order: 0, plannedEnd: '2026-09-01' });
+    const task = await request(app)
+      .post(`/api/stages/${stage.body._id}/tasks`)
+      .send({ title: 'Rough cut', departmentId: department.body._id, dueDate: '2026-08-20' });
+
+    await request(app).delete(`/api/stages/${stage.body._id}`);
+
+    const taskAfter = await request(app).get(`/api/tasks/${task.body._id}`);
+    expect(taskAfter.status).toBe(404);
+  });
 });
