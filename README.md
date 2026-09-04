@@ -30,10 +30,12 @@ Jest/Supertest tests, and the OpenAPI spec at
   (`Department.email`). Configure via `SMTP_*` env vars — unconfigured
   (the default), it logs instead of sending, so no real credentials are
   ever required for dev or for the test suite.
-- Backend is complete and tested (`tests/user.test.js`,
-  `tests/mailer.test.js`, `tests/notificationEmail.test.js`). The
-  frontend (a "who am I" picker, an assignee dropdown on tasks, toast
-  popups for live alerts) is the next planned increment, not yet built.
+- Backend is tested (`tests/user.test.js`, `tests/mailer.test.js`,
+  `tests/notificationEmail.test.js`). On the frontend: an **"Acting as"**
+  picker in the header (who you are, remembered per-browser via
+  `localStorage`, not a login), an assignee dropdown on every task in
+  the stage panel, and toast popups for live alerts — shown alongside
+  the existing notification bell, not replacing it.
 
 ### Frontend
 
