@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useIdentity } from '../../context/IdentityContext';
 
 const TASK_STATUS_LABEL = {
   todo: 'To do',
@@ -7,7 +8,15 @@ const TASK_STATUS_LABEL = {
   delayed: 'Delayed',
 };
 
-export default function StageDetailPanel({ stage, tasks, onCompleteTask, onCompleteStage, onClose }) {
+export default function StageDetailPanel({
+  stage,
+  tasks,
+  onCompleteTask,
+  onCompleteStage,
+  onAssignTask,
+  onClose,
+}) {
+  const { users } = useIdentity();
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
 
@@ -37,19 +46,40 @@ export default function StageDetailPanel({ stage, tasks, onCompleteTask, onCompl
 
       <ul className="stage-panel__tasks">
         {tasks.length === 0 && <li className="stage-panel__empty">No tasks yet.</li>}
-        {tasks.map((task) => (
-          <li key={task._id} className="task-row">
-            <div>
-              <p className="task-row__title">{task.title}</p>
-              <p className="task-row__meta">{TASK_STATUS_LABEL[task.status]}</p>
-            </div>
-            {task.status !== 'done' && (
-              <button type="button" onClick={() => onCompleteTask(task._id)}>
-                Mark done
-              </button>
-            )}
-          </li>
-        ))}
+        {tasks.map((task) => {
+          const assignee = users.find((u) => u._id === task.assigneeId);
+          return (
+            <li key={task._id} className="task-row">
+              <div>
+                <p className="task-row__title">{task.title}</p>
+                <p className="task-row__meta">
+                  {TASK_STATUS_LABEL[task.status]}
+                  {assignee && ` · ${assignee.name}`}
+                </p>
+              </div>
+              <div className="task-row__actions">
+                <select
+                  className="task-row__assignee"
+                  value={task.assigneeId || ''}
+                  onChange={(e) => onAssignTask(task._id, e.target.value)}
+                  aria-label={`Assignee for ${task.title}`}
+                >
+                  <option value="">Unassigned</option>
+                  {users.map((u) => (
+                    <option key={u._id} value={u._id}>
+                      {u.name}
+                    </option>
+                  ))}
+                </select>
+                {task.status !== 'done' && (
+                  <button type="button" onClick={() => onCompleteTask(task._id)}>
+                    Mark done
+                  </button>
+                )}
+              </div>
+            </li>
+          );
+        })}
       </ul>
 
       {stage.status === 'active' && (

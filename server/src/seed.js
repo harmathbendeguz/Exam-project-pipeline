@@ -12,6 +12,7 @@ const Stage = require('./models/Stage');
 const Task = require('./models/Task');
 const Department = require('./models/Department');
 const Notification = require('./models/Notification');
+const User = require('./models/User');
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const inDays = (n) => new Date(Date.now() + n * DAY_MS);
@@ -24,6 +25,16 @@ const STAGES = [
   { name: 'Final Review', department: 'Post Supervisor' },
 ];
 
+// One person per department, so the "who am I" picker and every
+// assignee dropdown have real choices without any manual setup.
+const USER_NAMES = {
+  Editing: 'Alex Kovács',
+  Color: 'Bianka Tóth',
+  Sound: 'Csaba Nagy',
+  VFX: 'Dóra Szabó',
+  'Post Supervisor': 'Erik Farkas',
+};
+
 async function seed() {
   await connectDB();
 
@@ -33,6 +44,7 @@ async function seed() {
     Stage.deleteMany({}),
     Project.deleteMany({}),
     Department.deleteMany({}),
+    User.deleteMany({}),
   ]);
 
   const departments = {};
@@ -41,6 +53,15 @@ async function seed() {
     departments[department] = await Department.create({
       name: department,
       email: `${department.toLowerCase().replace(/\s+/g, '-')}@postflow.dev`,
+    });
+  }
+
+  const users = {};
+  for (const [department, name] of Object.entries(USER_NAMES)) {
+    users[department] = await User.create({
+      name,
+      email: `${name.split(' ')[0].toLowerCase()}@postflow.dev`,
+      departmentId: departments[department]._id,
     });
   }
 
@@ -73,6 +94,10 @@ async function seed() {
     await Task.create({
       stageId: stage._id,
       departmentId: departments[department]._id,
+      // Give each stage's review task an assignee, so the per-user
+      // progress view (GET /api/users/:id/tasks) has real data spread
+      // across every department, not just one.
+      assigneeId: users[department]._id,
       title: `${name} — review`,
       dueDate: inDays((index + 1) * 10 - 1),
     });
@@ -89,6 +114,7 @@ async function seed() {
   });
 
   console.log(`Seeded ${Object.keys(departments).length} departments.`);
+  console.log(`Seeded ${Object.keys(users).length} users.`);
   console.log(`Seeded project "${project.title}" with ${STAGES.length} stages and tasks.`);
   console.log('Seeded a second, stage-less project ("Untitled Doc Short").');
 

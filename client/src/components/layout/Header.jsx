@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import IdentityPicker from './IdentityPicker';
 import NotificationBell from '../notifications/NotificationBell';
 
 export default function Header() {
@@ -7,7 +8,10 @@ export default function Header() {
       <Link to="/" className="header__brand">
         PostFlow
       </Link>
-      <NotificationBell />
+      <div className="header__actions">
+        <IdentityPicker />
+        <NotificationBell />
+      </div>
     </header>
   );
 }

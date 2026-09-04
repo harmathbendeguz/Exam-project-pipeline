@@ -1,14 +1,10 @@
-const TYPE_LABEL = {
-  task_delayed: 'Delayed',
-  task_incomplete: 'Blocking',
-  stage_unlocked: 'Unlocked',
-};
+import { NOTIFICATION_TYPE_LABEL } from '../../constants/notificationTypes';
 
 export default function NotificationItem({ notification, onMarkRead }) {
   return (
     <li className={`notification-item${notification.read ? '' : ' notification-item--unread'}`}>
       <span className={`notification-item__badge notification-item__badge--${notification.type}`}>
-        {TYPE_LABEL[notification.type] || notification.type}
+        {NOTIFICATION_TYPE_LABEL[notification.type] || notification.type}
       </span>
       <div className="notification-item__body">
         <p className="notification-item__message">{notification.message}</p>

@@ -6,7 +6,7 @@ import StageDetailPanel from '../components/pipeline/StageDetailPanel';
 
 export default function ProjectPage() {
   const { id } = useParams();
-  const { project, stages, tasksByStage, loading, error, completeTask, completeStage } =
+  const { project, stages, tasksByStage, loading, error, completeTask, completeStage, assignTask } =
     useProjectPipeline(id);
   const [selectedStageId, setSelectedStageId] = useState(null);
 
@@ -45,6 +45,7 @@ export default function ProjectPage() {
             tasks={tasksByStage[selectedStage._id] || []}
             onCompleteTask={completeTask}
             onCompleteStage={completeStage}
+            onAssignTask={assignTask}
             onClose={() => setSelectedStageId(null)}
           />
         )}

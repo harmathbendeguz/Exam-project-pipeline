@@ -49,6 +49,13 @@ export function useProjectPipeline(projectId) {
     await refresh();
   }
 
+  // '' from the "Unassigned" option means "clear it" — sent as null so
+  // Mongoose unsets the field rather than casting an empty string.
+  async function assignTask(taskId, assigneeId) {
+    await updateTask(taskId, { assigneeId: assigneeId || null });
+    await refresh();
+  }
+
   // Throws on a rule violation (e.g. 409 "task(s) not done") so the caller
   // can show it inline instead of it disappearing into the console.
   async function completeStage(stageId) {
@@ -56,5 +63,15 @@ export function useProjectPipeline(projectId) {
     await refresh();
   }
 
-  return { project, stages, tasksByStage, loading, error, completeTask, completeStage, refresh };
+  return {
+    project,
+    stages,
+    tasksByStage,
+    loading,
+    error,
+    completeTask,
+    completeStage,
+    assignTask,
+    refresh,
+  };
 }
