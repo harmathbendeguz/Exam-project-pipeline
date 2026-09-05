@@ -3,6 +3,8 @@
 // backend's own rule that only repositories touch the database: here,
 // only this module touches the network.
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// ha nicns kitöltve akkor használja a basic localhost url-t
+
 
 export async function request(path, options = {}) {
   const res = await fetch(`${BASE_URL}${path}`, {

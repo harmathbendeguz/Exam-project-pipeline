@@ -1,4 +1,4 @@
-// Only file allowed to talk to Department's Mongoose model. No business
+// Only file allowed to talk to Department's Mongoose model. 
 // rules here (e.g. "must a department exist before X") — just persistence.
 const Department = require('../models/Department');
 
