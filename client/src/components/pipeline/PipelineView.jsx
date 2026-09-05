@@ -44,7 +44,11 @@ export default function PipelineView({ stages, tasksByStage, onSelectStage, sele
 
   return (
     <div className="pipeline-view">
-      <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} fitView>
+      {/* maxZoom caps fitView too, not just manual zooming — without it, a
+          pipeline with only one or two stages has so little to fit that
+          fitView zooms in well past 1:1 and the node clips top/bottom on
+          a short mobile viewport. */}
+      <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} fitView maxZoom={1}>
         <Background />
         <Controls showInteractive={false} />
       </ReactFlow>

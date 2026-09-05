@@ -89,6 +89,12 @@ a {
   color: var(--text);
   background: var(--surface);
   max-width: 160px;
+  /* The placeholder ("— pick who you are —") is longer than any real
+     name will be — clip it gracefully instead of letting it collide
+     with the dropdown arrow on narrow screens. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .layout__content {
@@ -725,7 +731,9 @@ a {
   }
 
   .identity-picker select {
-    max-width: 110px;
+    /* The label is hidden at this width, freeing up room the select can
+       use — still narrower than default so it never crowds the bell. */
+    max-width: 150px;
   }
 
   .project-list {

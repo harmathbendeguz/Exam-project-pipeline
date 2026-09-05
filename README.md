@@ -4,9 +4,11 @@ Film post-production pipeline manager. Tracks projects through a sequential
 pipeline of stages (e.g. Editing, Color Grading, Sound), each made up of
 tasks owned by departments, with automatic delay detection and notifications.
 
-Three-tier architecture: `route → controller → service → repository → model`.
-Controllers never touch the database directly; repositories never contain
-business rules.
+Three-tier architecture — presentation (`route`, `controller`), business
+logic (`service`), and data access (`repository`, `model`), the last two
+tiers each split into two files for a sharper boundary:
+`route → controller → service → repository → model`. Controllers never
+touch the database directly; repositories never contain business rules.
 
 ## Status
 
