@@ -188,7 +188,9 @@ a {
   margin: 0;
 }
 
-.new-project-form {
+/* Shared by every "create X" form (NewProjectForm, NewStageForm, …) so
+   adding one more never means copy-pasting this block again. */
+.inline-form {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -197,13 +199,13 @@ a {
   margin-bottom: 1rem;
 }
 
-.new-project-form__row {
+.inline-form__row {
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
 }
 
-.new-project-form__row label {
+.inline-form__row label {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -213,7 +215,7 @@ a {
   min-width: 160px;
 }
 
-.new-project-form__row input {
+.inline-form__row input {
   padding: 0.45rem 0.6rem;
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -223,13 +225,13 @@ a {
   background: var(--surface);
 }
 
-.new-project-form__actions {
+.inline-form__actions {
   display: flex;
   gap: 0.5rem;
   margin-top: 0.75rem;
 }
 
-.new-project-form__error {
+.inline-form__error {
   color: var(--delayed);
   font-size: 0.85rem;
   margin-top: 0.5rem;
@@ -313,6 +315,17 @@ a {
 
 .project-page__header {
   margin-bottom: 1rem;
+}
+
+.project-page__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.project-page__title-row h1 {
+  margin: 0;
 }
 
 .project-page__back {

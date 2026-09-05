@@ -1,9 +1,12 @@
 import { useState } from 'react';
 
-export default function NewProjectForm({ onCreate, onCancel }) {
-  const [title, setTitle] = useState('');
-  const [client, setClient] = useState('');
-  const [deadline, setDeadline] = useState('');
+// Deliberately minimal: just a name and a planned end date. `order` is
+// never asked for here — the pipeline is sequential, so the hook always
+// appends the new stage after every existing one (see useProjectPipeline's
+// createStage). Same shape as NewProjectForm, one field simpler.
+export default function NewStageForm({ onCreate, onCancel }) {
+  const [name, setName] = useState('');
+  const [plannedEnd, setPlannedEnd] = useState('');
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
 
@@ -12,10 +15,9 @@ export default function NewProjectForm({ onCreate, onCancel }) {
     setBusy(true);
     setError(null);
     try {
-      await onCreate({ title, client: client || undefined, deadline });
+      await onCreate({ name, plannedEnd });
     } catch (err) {
-      // Whatever the API rejected (e.g. a missing required field) shows
-      // up here verbatim, same pattern as the stage-completion panel.
+      // Same pattern as NewProjectForm: show the API's own message verbatim.
       setError(err.message);
       setBusy(false);
     }
@@ -25,19 +27,15 @@ export default function NewProjectForm({ onCreate, onCancel }) {
     <form className="inline-form" onSubmit={handleSubmit}>
       <div className="inline-form__row">
         <label>
-          Title
-          <input value={title} onChange={(e) => setTitle(e.target.value)} required />
+          Stage name
+          <input value={name} onChange={(e) => setName(e.target.value)} required autoFocus />
         </label>
         <label>
-          Client
-          <input value={client} onChange={(e) => setClient(e.target.value)} />
-        </label>
-        <label>
-          Deadline
+          Planned end
           <input
             type="date"
-            value={deadline}
-            onChange={(e) => setDeadline(e.target.value)}
+            value={plannedEnd}
+            onChange={(e) => setPlannedEnd(e.target.value)}
             required
           />
         </label>
@@ -45,7 +43,7 @@ export default function NewProjectForm({ onCreate, onCancel }) {
       {error && <p className="inline-form__error">{error}</p>}
       <div className="inline-form__actions">
         <button type="submit" className="btn" disabled={busy}>
-          {busy ? 'Creating…' : 'Create project'}
+          {busy ? 'Creating…' : 'Create stage'}
         </button>
         <button type="button" className="btn btn--secondary" onClick={onCancel}>
           Cancel

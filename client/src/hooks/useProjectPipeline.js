@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { getProject, listStagesForProject } from '../api/projects';
+import { getProject, listStagesForProject, createStage as createStageForProject } from '../api/projects';
 import { listTasksForStage, updateStage } from '../api/stages';
 import { updateTask } from '../api/tasks';
 
@@ -63,6 +63,15 @@ export function useProjectPipeline(projectId) {
     await refresh();
   }
 
+  // The simplest possible "add a stage": append it after every existing
+  // one. `order` is computed here, never asked for in the form — the
+  // pipeline is sequential, so "next slot" is the only order that ever
+  // makes sense for a stage created from the UI.
+  async function createStage(data) {
+    await createStageForProject(projectId, { ...data, order: stages.length });
+    await refresh();
+  }
+
   return {
     project,
     stages,
@@ -72,6 +81,7 @@ export function useProjectPipeline(projectId) {
     completeTask,
     completeStage,
     assignTask,
+    createStage,
     refresh,
   };
 }
