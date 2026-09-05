@@ -1,9 +1,9 @@
 import { useState } from 'react';
 
 // Deliberately minimal: just a name and a planned end date. `order` is
-// never asked for here — the pipeline is sequential, so the hook always
-// appends the new stage after every existing one (see useProjectPipeline's
-// createStage). Same shape as NewProjectForm, one field simpler.
+// never asked for here — the pipeline is sequential, so ProjectPage's
+// createStage always appends the new stage after every existing one.
+// Same shape as NewProjectForm, one field simpler.
 export default function NewStageForm({ onCreate, onCancel }) {
   const [name, setName] = useState('');
   const [plannedEnd, setPlannedEnd] = useState('');
