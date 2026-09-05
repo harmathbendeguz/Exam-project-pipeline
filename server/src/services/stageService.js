@@ -54,14 +54,14 @@ async function updateStage(id, data) {
 async function deleteStage(id) {
   const stage = await stageRepository.deleteById(id);
   if (!stage) throw new NotFoundError(`Stage ${id} not found`);
-  // Cascade: a Task with no Stage is an orphan nothing can reach again.
+  // Cascade: Ez azért van hogy feleslegesen ne maradjon benne task az adatbázisban. 
   await taskRepository.deleteByStageIds([id]);
   return stage;
 }
 
 async function validateStatusTransition(stage, newStatus) {
   if (newStatus === 'active') {
-    if (stage.order === 0) return; // first stage may always (re)activate
+    if (stage.order === 0) return; // Legelső stage esetén, sose lehet locked, ez mindig active vagy done! 
     const previous = await stageRepository.findByProjectAndOrder(stage.projectId, stage.order - 1);
     if (!previous || previous.status !== 'done') {
       throw new ConflictError(
@@ -83,7 +83,8 @@ async function validateStatusTransition(stage, newStatus) {
       );
       throw new ConflictError(
         `Cannot complete stage "${stage.name}" — ${incomplete.length} task(s) not done`
-      );
+      ); // Külön funkció, ahhoz, hogy a taskok biztosan vissza legyenek ellenőrzive és ne tudjon a felhasználó a task végzése nélkül lezárni a stageket
+
     }
   }
 }
@@ -91,6 +92,7 @@ async function validateStatusTransition(stage, newStatus) {
 async function unlockNextStage(stage) {
   const next = await stageRepository.findByProjectAndOrder(stage.projectId, stage.order + 1);
   if (!next || next.status !== 'locked') return;
+  // A következő stage aktivációja, ha nincs következő stage pl legutolsó stage, nem megy tovább vagy ha következő nem locked. 
 
   await stageRepository.updateById(next._id, { status: 'active' });
 
@@ -98,10 +100,10 @@ async function unlockNextStage(stage) {
   await notifyDepartments(tasks, 'stage_unlocked', () => `Stage "${next.name}" is now active`);
 }
 
-// Notifies each distinct department represented in `tasks` once, using
+// Notifikáicós funkció értesitést küld a részlegeknek
 // `messageFor(task)` to build that department's message.
 async function notifyDepartments(tasks, type, messageFor) {
-  const seen = new Set();
+  const seen = new Set(); // nem lehet benne duplikáció igy! 
   await Promise.all(
     tasks
       .filter((task) => {
@@ -109,8 +111,10 @@ async function notifyDepartments(tasks, type, messageFor) {
         if (seen.has(key)) return false;
         seen.add(key);
         return true;
+
+      //duplikációk elkerülése miatt tettük ide.
       })
-      .map((task) =>
+      .map((task) => // Az értékek átadásához szükséges fix struktúra
         notificationService.notify({
           departmentId: task.departmentId,
           taskId: task._id,

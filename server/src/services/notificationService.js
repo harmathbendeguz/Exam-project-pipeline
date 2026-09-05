@@ -30,6 +30,7 @@ async function resolveAlertEmail({ departmentId, taskId }) {
   }
   const department = await departmentRepository.findById(departmentId);
   return department?.email;
+  // ha nem talál emailt akkor a department emailjét keresi, tovább fejlesztésre szorul.
 }
 
 async function notify({ departmentId, taskId, type, message }) {
